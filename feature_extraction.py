@@ -22,7 +22,7 @@ shape = (fc7.get_shape().as_list()[-1], nb_classes)  # use this shape for the we
 
 # fc8, 1000
 fc8W = tf.Variable(tf.random_normal(shape, stddev=0.35), dtype='float32')
-fc8b = tf.Variable(tf.zeros([shape[1]]), dtype='float32')
+fc8b = tf.Variable(tf.zeros(nb_classes), dtype='float32')
 
 probs = tf.nn.softmax(tf.matmul(fc7, fc8W) + fc8b)
 
