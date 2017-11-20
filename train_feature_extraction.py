@@ -65,8 +65,8 @@ FC7 = tf.nn.dropout(FC7, KEEP_PROB)
 # This also makes training faster, less work to do!
 FC7 = tf.stop_gradient(FC7)
 
-# Add the final layer for traffic sign classification. Input = 1000. Output = n_classes.
-FC8_W = tf.Variable(tf.truncated_normal(shape=(1000, N_CLASSES), mean=MU, stddev=SIGMA))
+# Add the final layer for traffic sign classification. Input = 4096. Output = n_classes.
+FC8_W = tf.Variable(tf.truncated_normal(shape=(4096, N_CLASSES), mean=MU, stddev=SIGMA))
 FC8_B = tf.Variable(tf.zeros(N_CLASSES))
 LOGITS = tf.add(tf.matmul(FC7, FC8_W), FC8_B, name='logits')
 
@@ -85,18 +85,19 @@ ACCURACY_OPERATION = tf.reduce_mean(
 
 # Train and evaluate the feature extraction model.
 
-def evaluate(x_data, y_data, batch_size, accuracy_operation):
+def evaluate(sess, x_data, y_data, batch_size, accuracy_operation):
     """ Evaluate Accuracy """
     total_accuracy = 0
     num_examples = len(x_data)
-    with tf.get_default_session() as sess:
-        for offset in range(0, num_examples, batch_size):
-            batch_x, batch_y = x_data[offset:offset+batch_size], y_data[offset:offset+batch_size]
-            accuracy = sess.run(
-                accuracy_operation,
-                feed_dict={X: batch_x, Y: batch_y, KEEP_PROB: 1.0}
-            )
-            total_accuracy += (accuracy * len(batch_x))
+
+    for offset in range(0, num_examples, batch_size):
+        batch_x, batch_y = x_data[offset:offset+batch_size], y_data[offset:offset+batch_size]
+        accuracy = sess.run(
+            accuracy_operation,
+            feed_dict={X: batch_x, Y: batch_y, KEEP_PROB: 1.0}
+        )
+        total_accuracy += (accuracy * len(batch_x))
+
     return total_accuracy / num_examples
 
 def train():
@@ -115,9 +116,9 @@ def train():
                 batch_x, batch_y = x_train[offset:end], y_train[offset:end]
                 sess.run(TRAINING_OPERATION, feed_dict={X: batch_x, Y: batch_y, KEEP_PROB: 0.5})
 
-            training_acccuracy = evaluate(x_train, y_train, batch_size, ACCURACY_OPERATION)
+            training_acccuracy = evaluate(sess, x_train, y_train, batch_size, ACCURACY_OPERATION)
             print("Training Accuracy   = {:.3f}".format(training_acccuracy))
-            validation_accuracy = evaluate(X_VALID, Y_VALID, batch_size, ACCURACY_OPERATION)
+            validation_accuracy = evaluate(sess, X_VALID, Y_VALID, batch_size, ACCURACY_OPERATION)
             print("Validation Accuracy = {:.3f}".format(validation_accuracy))
             print()
 
@@ -132,7 +133,7 @@ def test():
 
         accuracy_operation = tf.get_default_graph().get_tensor_by_name("accuracy_operation:0")
 
-        test_accuracy = evaluate(X_TEST, Y_TEST, 100, accuracy_operation)
+        test_accuracy = evaluate(sess, X_TEST, Y_TEST, 100, accuracy_operation)
         print("Test Accuracy = {:.3f}".format(test_accuracy))
 
 train()
