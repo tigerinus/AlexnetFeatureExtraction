@@ -16,7 +16,7 @@ SIGMA = 0.1
 
 RATE = 0.001
 EPOCHS = 20
-BATCH_SIZE_STEP = 50
+BATCH_SIZE = 300
 
 # Load sign names
 SIGN_NAMES = pd.read_csv('signnames.csv')
@@ -109,16 +109,16 @@ def train():
 
         for i in range(EPOCHS):
             x_train, y_train = shuffle(X_TRAIN, Y_TRAIN)
-            batch_size = BATCH_SIZE_STEP * (i + 1)
-            print("EPOCH {} - Training (batch_size: {})".format(i+1, batch_size))
-            for offset in range(0, N_TRAIN, batch_size):
-                end = offset + batch_size
+
+            print("EPOCH {} - Training (BATCH_SIZE: {})".format(i+1, BATCH_SIZE))
+            for offset in range(0, N_TRAIN, BATCH_SIZE):
+                end = offset + BATCH_SIZE
                 batch_x, batch_y = x_train[offset:end], y_train[offset:end]
                 sess.run(TRAINING_OPERATION, feed_dict={X: batch_x, Y: batch_y, KEEP_PROB: 0.5})
 
-            training_acccuracy = evaluate(sess, x_train, y_train, batch_size, ACCURACY_OPERATION)
+            training_acccuracy = evaluate(sess, x_train, y_train, BATCH_SIZE, ACCURACY_OPERATION)
             print("Training Accuracy   = {:.3f}".format(training_acccuracy))
-            validation_accuracy = evaluate(sess, X_VALID, Y_VALID, batch_size, ACCURACY_OPERATION)
+            validation_accuracy = evaluate(sess, X_VALID, Y_VALID, BATCH_SIZE, ACCURACY_OPERATION)
             print("Validation Accuracy = {:.3f}".format(validation_accuracy))
             print()
 
